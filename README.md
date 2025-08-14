@@ -3,9 +3,10 @@
 - master: 1:1 unidirectional mapping
 - one-to-one-bidirectional: 1:1 bidirectional mapping with Byte Enhancement
 
-## master
+## master(1:1 unidirectional mapping)
 
 ### Domain
+
 ```java
 public class User {
 
@@ -54,6 +55,7 @@ public class UserProfile {
 ```
 
 ### Table
+
 ```sql
 create table user_info
 (
@@ -78,7 +80,9 @@ alter table if exists user_info
             references user_profile
 
 ```
+
 ### logs
+
 ```
 === 단방향 1:1 Lazy Loading 테스트 ===
 1. Before userRepository.findById
@@ -112,3 +116,81 @@ Hibernate:
    UserProfile is initialized: true
    Bio: 단방향 Lazy Loading 테스트
 ```
+
+## master(1:1 unidirectional mapping with @MapsId)
+@MapsId를 사용함으로써 부모의 PK와 자식의 PK가 동일한 값으로 사용된다.
+### Domain
+
+```java
+public class User {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
+    @Column(nullable = false, unique = true, length = 12)
+    private String name;
+
+    @Column(nullable = false, length = 18)
+    private String password;
+
+    @Column(nullable = false, unique = true, length = 30)
+    private String email;
+
+    // 단방향 예시로 명확한 lazy loading 시점 테스트
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @MapsId
+    private UserProfile userProfile;
+
+    public void modifyUserProfile(UserProfile userProfile) {
+        this.userProfile = userProfile;
+    }
+}
+```
+
+
+```java
+public class UserProfile {
+
+    @Id
+    private Long id;
+
+    @Column(length = 100)
+    private String bio;
+
+    @Column(length = 20)
+    private String phoneNumber;
+
+    @Column(length = 100)
+    private String address;
+
+    // 단방향 관계로 변경 - User 참조 제거
+}
+```
+
+### Table
+
+```sql
+create table user_info
+(
+    id       bigint      not null,
+    name     varchar(12) not null unique,
+    password varchar(18) not null,
+    email    varchar(30) not null unique,
+    primary key (id)
+);
+
+create table user_profile
+(
+    id           bigint not null,
+    phone_number varchar(20),
+    address      varchar(100),
+    bio          varchar(100),
+    primary key (id)
+);
+
+alter table if exists user_info
+    add constraint FKn5qwr4sh64d0pv07y5ad1eigq
+        foreign key (id)
+            references user_profile
+ ```

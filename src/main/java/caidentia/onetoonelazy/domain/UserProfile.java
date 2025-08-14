@@ -14,7 +14,6 @@ import lombok.NoArgsConstructor;
 public class UserProfile {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @Column(length = 100)
