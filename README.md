@@ -33,7 +33,7 @@ alter table if exists user_info
         foreign key (user_profile_id)
             references user_profile
 ```
-### logs
+### 부모-> 자식 logs
 ```
 === 양방향 1:1 Lazy Loading 테스트 ===
 1. Before userRepository.findById
@@ -66,4 +66,43 @@ Hibernate:
 3. After userProfile.getBio()
    UserProfile is initialized: true
    Bio: 단방향 Lazy Loading 테스트
+```
+
+### 자식->부모 logs
+```
+=== 양방향 1:1 Lazy Loading 테스트 ===
+1. Before userProfileRepository.findById
+[Hibernate] 
+    select
+        up1_0.id,
+        up1_0.address,
+        up1_0.bio,
+        up1_0.phone_number 
+    from
+        user_profile up1_0 
+    where
+        up1_0.id=?
+1. After userProfileRepository.findById
+2. Before foundUserProfile.getUser()
+Expecting initialized would be true. Byte Enhancement 's property interceptor triggered by approching getter method.
+[Hibernate] 
+    select
+        u1_0.id,
+        u1_0.email,
+        u1_0.name,
+        u1_0.password,
+        u1_0.user_profile_id 
+    from
+        user_profile up1_0 
+    left join
+        user_info u1_0 
+            on up1_0.id=u1_0.user_profile_id 
+    where
+        up1_0.id=?
+2. After foundUserProfile.getUser()
+   User is initialized: true
+3. Before user.getName()
+3. After user.getName()
+   User is initialized: true
+   userName: lazyTest
 ```

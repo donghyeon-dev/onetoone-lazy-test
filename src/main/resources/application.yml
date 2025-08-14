@@ -11,6 +11,7 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        highlight_sql: true
 #        enable_lazy_load_no_trans: false
         # enhancer:
         #   enableLazyInitialization: true
@@ -23,14 +24,11 @@ spring:
     username: sa
     password: ""
 
-#logging:
-#  level:
-#    org:
-#      hibernate:
-#        SQL: DEBUG
-#        type:
-#          descriptor:
-#            sql:
-#              BasicBinder: TRACE
+logging:
+  level:
+    org.hibernate.orm.jdbc.bind: TRACE  # 파라미터 바인딩 값
+    # org.hibernate.orm.jdbc.extract: TRACE  # (선택) ResultSet 추출 로그
+
+
 server:
   port: 8899

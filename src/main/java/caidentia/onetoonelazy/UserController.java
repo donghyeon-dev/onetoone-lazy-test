@@ -2,14 +2,15 @@ package caidentia.onetoonelazy;
 
 import caidentia.onetoonelazy.domain.User;
 import caidentia.onetoonelazy.domain.UserProfile;
+import caidentia.onetoonelazy.repository.UserProfileRepository;
 import caidentia.onetoonelazy.repository.UserRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 
 @RestController
 @RequestMapping("/user")
@@ -17,12 +18,16 @@ import jakarta.persistence.PersistenceContext;
 public class UserController {
 
     private final UserRepository userRepository;
-    
+
+    private final UserProfileRepository userProfileRepository;
+
+    private final EntityManagerFactory entityManagerFactory;
+
     @PersistenceContext
     private EntityManager entityManager;
 
-    @GetMapping("/lazy-test")
-    public void lazyLoadingTest(){
+    @GetMapping("/save")
+    public void saveUser() {
         // User 생성 및 저장
         User user = User.builder()
                 .name("lazyTest")
@@ -31,35 +36,58 @@ public class UserController {
                 .build();
 
         UserProfile profile = UserProfile.builder()
-                .bio("단방향 Lazy Loading 테스트")
+                .bio("양방향 Lazy Loading 테스트")
                 .phoneNumber("010-1111-2222")
                 .address("서울시 강남구")
                 .build();
 
         user.modifyUserProfile(profile);
         var savedUser = userRepository.saveAndFlush(user);
-        
-        // 영속성 컨텍스트 초기화 - 중요!
-        entityManager.clear();
+    }
+
+    @GetMapping("/lazy-test-user")
+    public void lazyLoadingTest() {
+
 
         System.out.println("=== 양방향 1:1 Lazy Loading 테스트 ===");
         System.out.println("1. Before userRepository.findById");
-        User foundUser = userRepository.findById(savedUser.getId()).orElseThrow();
+        User foundUser = userRepository.findById(1L).orElseThrow();
         System.out.println("1. After userRepository.findById");
 
         System.out.println("2. Before foundUser.getUserProfile()");
         UserProfile userProfile = foundUser.getUserProfile();
         System.out.println("2. After foundUser.getUserProfile()");
-        System.out.println("   UserProfile is initialized: " + org.hibernate.Hibernate.isInitialized(userProfile));
+        System.out.println("   UserProfile is initialized: " + entityManagerFactory.getPersistenceUnitUtil().isLoaded(userProfile, "userProfile"));
         // initialized would be true. Byte Enhancement's property interceptor triggered by approching getter method.
         // 단방향에서의 프록시방식처럼 getBio에서 쿼리가 실행되길 바란다면, 부모 쪽이 FK를 가져야함
 
         System.out.println("3. Before userProfile.getBio()");
         String bio = userProfile.getBio();
         System.out.println("3. After userProfile.getBio()");
-        System.out.println("   UserProfile is initialized: " + org.hibernate.Hibernate.isInitialized(userProfile));
+        System.out.println("   UserProfile is initialized: " + entityManagerFactory.getPersistenceUnitUtil().isLoaded(userProfile, "userProfile"));
         System.out.println("   Bio: " + bio);
-        
-        userRepository.delete(foundUser);
+
+    }
+
+    @GetMapping("/lazy-test-user-profile")
+    public void profileLazyLoadingTest() {
+        System.out.println("=== 양방향 1:1 Lazy Loading 테스트 ===");
+        System.out.println("1. Before userProfileRepository.findById");
+        UserProfile foundUserProfile = userProfileRepository.findById(1L).orElseThrow();
+        System.out.println("1. After userProfileRepository.findById");
+
+        System.out.println("2. Before foundUserProfile.getUser()");
+        System.out.println("Expecting initialized would be true. Byte Enhancement 's property interceptor triggered by approching getter method.");
+        User user = foundUserProfile.getUser();
+        System.out.println("   User is initialized: " + entityManagerFactory.getPersistenceUnitUtil().isLoaded(user, "user"));
+        System.out.println("2. After foundUserProfile.getUser()");
+
+
+        System.out.println("3. Before user.getName()");
+        String userName = user.getName();
+        System.out.println("3. After user.getName()");
+        System.out.println("   User is initialized: " + entityManagerFactory.getPersistenceUnitUtil().isLoaded(user, "user"));
+        System.out.println("   userName: " + userName);
+
     }
 }
