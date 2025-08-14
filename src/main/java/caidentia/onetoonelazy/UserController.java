@@ -42,7 +42,7 @@ public class UserController {
         // 영속성 컨텍스트 초기화 - 중요!
         entityManager.clear();
 
-        System.out.println("=== 단방향 1:1 Lazy Loading 테스트 ===");
+        System.out.println("=== 양방향 1:1 Lazy Loading 테스트 ===");
         System.out.println("1. Before userRepository.findById");
         User foundUser = userRepository.findById(savedUser.getId()).orElseThrow();
         System.out.println("1. After userRepository.findById");
@@ -51,6 +51,8 @@ public class UserController {
         UserProfile userProfile = foundUser.getUserProfile();
         System.out.println("2. After foundUser.getUserProfile()");
         System.out.println("   UserProfile is initialized: " + org.hibernate.Hibernate.isInitialized(userProfile));
+        // initialized would be true. Byte Enhancement's property interceptor triggered by approching getter method.
+        // 단방향에서의 프록시방식처럼 getBio에서 쿼리가 실행되길 바란다면, 부모 쪽이 FK를 가져야함
 
         System.out.println("3. Before userProfile.getBio()");
         String bio = userProfile.getBio();

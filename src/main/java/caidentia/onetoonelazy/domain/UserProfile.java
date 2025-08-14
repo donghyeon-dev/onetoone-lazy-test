@@ -26,5 +26,10 @@ public class UserProfile {
     @Column(length = 100)
     private String address;
 
-    // 단방향 관계로 변경 - User 참조 제거
+    @OneToOne(fetch= FetchType.LAZY, mappedBy = "userProfile")
+    private User user;
+
+    public void modifyUser(User user) {
+        this.user = user;
+    }
 }
