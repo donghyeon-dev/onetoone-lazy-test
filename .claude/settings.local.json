@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./gradlew test:*)",
+      "Bash(./gradlew:*)",
+      "Bash(find:*)",
+      "WebFetch(domain:docs.jboss.org)",
+      "Bash(del \"C:\\Users\\user\\Documents\\emro\\prototype\\onetoone-lazy\\src\\test\\java\\caidentia\\onetoonelazy\\CompleteLazyLoadingTest.java\")",
+      "Bash(del \"C:\\Users\\user\\Documents\\emro\\prototype\\onetoone-lazy\\src\\test\\java\\caidentia\\onetoonelazy\\DetailedAnalysisTest.java\")",
+      "Bash(del \"C:\\Users\\user\\Documents\\emro\\prototype\\onetoone-lazy\\src\\test\\java\\caidentia\\onetoonelazy\\RealSolutionTest.java\")",
+      "Bash(del \"C:\\Users\\user\\Documents\\emro\\prototype\\onetoone-lazy\\src\\test\\java\\caidentia\\onetoonelazy\\RealWorldLazyLoadingTest.java\")",
+      "Bash(del \"C:\\Users\\user\\Documents\\emro\\prototype\\onetoone-lazy\\src\\test\\java\\caidentia\\onetoonelazy\\UserLazyLoadingTest.java\")",
+      "Bash(rm:*)"
+    ],
+    "deny": [],
+    "ask": [],
+    "defaultMode": "acceptEdits"
+  }
+}
