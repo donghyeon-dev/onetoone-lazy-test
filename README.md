@@ -1,4 +1,15 @@
-## master(1:1 unidirectional mapping)
+# Branch 별 매핑전략
+1:1 매핑에서 LazyLoading을 사용하기위한 전략 목록 
+
+## master (1:1 unidirectional mapping)
+- LazyLoading을 사용하는 1:1 단방향 매핑 
+## one-to-one-bidirectional (Byte Enhancement)
+- Hibernate Byte Enhancement와 함께 LazyLoading을 사용하는 1:1 양방향 매핑 
+- 순수하게 Lazy Loading처럼 보이기 어려운 부분이 있음
+  - epxect: 자식 엔티티를 접근할 때(`user.getUserProfile()`)가 아닌, 자식 엔티티의 필드에 접근할때(`user.getUserProfile().getName()`) 조회쿼리 실행
+  - actual: 자식 엔티티를 접근할때 조회쿼리 실행(`user.getUserProfile()`)
+## one-to-one-bidirectional-mapsid
+- @MapsId를 사용하여 부모의 PK가 자식의 PK이자 FK가 되는 1:1 양방향 매핑
 
 ### Domain
 
