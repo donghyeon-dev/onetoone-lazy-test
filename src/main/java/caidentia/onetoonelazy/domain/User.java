@@ -27,8 +27,7 @@ public class User {
     private String email;
 
     // 양방향
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "user_profile_id")
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, optional = false, mappedBy = "user")
     private UserProfile userProfile;
 
     public void modifyUserProfile(UserProfile userProfile) {

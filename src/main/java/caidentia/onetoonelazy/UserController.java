@@ -58,8 +58,6 @@ public class UserController {
         UserProfile userProfile = foundUser.getUserProfile();
         System.out.println("2. After foundUser.getUserProfile()");
         System.out.println("   UserProfile is initialized: " + entityManagerFactory.getPersistenceUnitUtil().isLoaded(userProfile, "userProfile"));
-        // initialized would be true. Byte Enhancement's property interceptor triggered by approching getter method.
-        // 단방향에서의 프록시방식처럼 getBio에서 쿼리가 실행되길 바란다면, 부모 쪽이 FK를 가져야함
 
         System.out.println("3. Before userProfile.getBio()");
         String bio = userProfile.getBio();
@@ -77,7 +75,6 @@ public class UserController {
         System.out.println("1. After userProfileRepository.findById");
 
         System.out.println("2. Before foundUserProfile.getUser()");
-        System.out.println("Expecting initialized would be true. Byte Enhancement 's property interceptor triggered by approching getter method.");
         User user = foundUserProfile.getUser();
         System.out.println("   User is initialized: " + entityManagerFactory.getPersistenceUnitUtil().isLoaded(user, "user"));
         System.out.println("2. After foundUserProfile.getUser()");

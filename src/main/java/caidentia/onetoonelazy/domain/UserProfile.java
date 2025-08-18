@@ -26,7 +26,8 @@ public class UserProfile {
     @Column(length = 100)
     private String address;
 
-    @OneToOne(fetch= FetchType.LAZY, mappedBy = "userProfile")
+    @OneToOne(fetch= FetchType.LAZY)
+    @MapsId
     private User user;
 
     public void modifyUser(User user) {
