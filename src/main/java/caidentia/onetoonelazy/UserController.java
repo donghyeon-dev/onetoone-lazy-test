@@ -43,6 +43,22 @@ public class UserController {
 
         user.modifyUserProfile(profile);
         var savedUser = userRepository.saveAndFlush(user);
+
+        // User 생성 및 저장
+        User user2 = User.builder()
+                .name("lazyTest2")
+                .email("lazy2@example.com")
+                .password("password123")
+                .build();
+
+        UserProfile profile2 = UserProfile.builder()
+                .bio("양방향 Lazy Loading 테스트2")
+                .phoneNumber("010-1111-2223")
+                .address("서울시 강남구")
+                .build();
+
+        user2.modifyUserProfile(profile2);
+        var savedUser2 = userRepository.saveAndFlush(user2);
     }
 
     @GetMapping("/lazy-test-user")
@@ -55,11 +71,10 @@ public class UserController {
         System.out.println("1. After userRepository.findById");
 
         System.out.println("2. Before foundUser.getUserProfile()");
+        System.out.println("Expecting initialized would be true. Byte Enhancement 's property interceptor triggered by approching getter method.");
         UserProfile userProfile = foundUser.getUserProfile();
         System.out.println("2. After foundUser.getUserProfile()");
         System.out.println("   UserProfile is initialized: " + entityManagerFactory.getPersistenceUnitUtil().isLoaded(userProfile, "userProfile"));
-        // initialized would be true. Byte Enhancement's property interceptor triggered by approching getter method.
-        // 단방향에서의 프록시방식처럼 getBio에서 쿼리가 실행되길 바란다면, 부모 쪽이 FK를 가져야함
 
         System.out.println("3. Before userProfile.getBio()");
         String bio = userProfile.getBio();
@@ -77,7 +92,6 @@ public class UserController {
         System.out.println("1. After userProfileRepository.findById");
 
         System.out.println("2. Before foundUserProfile.getUser()");
-        System.out.println("Expecting initialized would be true. Byte Enhancement 's property interceptor triggered by approching getter method.");
         User user = foundUserProfile.getUser();
         System.out.println("   User is initialized: " + entityManagerFactory.getPersistenceUnitUtil().isLoaded(user, "user"));
         System.out.println("2. After foundUserProfile.getUser()");
