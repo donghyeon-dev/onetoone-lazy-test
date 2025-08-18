@@ -10,7 +10,7 @@
 ## one-to-one-bidirectional-mapsid
 ### Domain
 ```java
-public class UserBidirectionalLazyLoadingWithMapsId {
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -26,7 +26,7 @@ public class UserBidirectionalLazyLoadingWithMapsId {
     private String email;
 
     // 양방향
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, optional = false, mappedBy = "userBidirectionalWithMapsId")
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, optional = false, mappedBy = "user")
     private UserProfile userProfile;
 
     public void modifyUserProfile(UserProfile userProfile) {
@@ -37,7 +37,7 @@ public class UserBidirectionalLazyLoadingWithMapsId {
 ```
 
 ```java
-public class UserProfileBidirectionalLazyLoadingWithMapsId {
+public class UserProfile {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -104,10 +104,10 @@ alter table if exists user_profile
         u1_0.id=?
 2025-08-18T10:43:26.306+09:00 TRACE 74560 --- [onetoone-lazy] [nio-8899-exec-2] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [1]
 1. After userRepository.findById
-2. Before foundUserBidirectionalWithMapsId.getUserProfile()
-2. After foundUserBidirectionalWithMapsId.getUserProfile()
+2. Before foundUser.getUserProfile()
+2. After foundUser.getUserProfile()
    UserProfile is initialized: false
-3. Before userProfileBidirectionalWithMapsId.getBio()
+3. Before userProfile.getBio()
 [Hibernate] 
     select
         up1_0.user_id,
@@ -119,7 +119,7 @@ alter table if exists user_profile
     where
         up1_0.user_id=?
 2025-08-18T10:43:26.333+09:00 TRACE 74560 --- [onetoone-lazy] [nio-8899-exec-2] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [1]
-3. After userProfileBidirectionalWithMapsId.getBio()
+3. After userProfile.getBio()
    UserProfile is initialized: true
    Bio: 양방향 Lazy Loading 테스트
 
@@ -141,10 +141,10 @@ alter table if exists user_profile
         up1_0.user_id=?
 2025-08-18T10:43:49.686+09:00 TRACE 74560 --- [onetoone-lazy] [nio-8899-exec-3] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [1]
 1. After userProfileRepository.findById
-2. Before foundUserProfileBidirectionalLazyLoadingWithMapsId.getUser()
+2. Before foundUserProfile.getUser()
    User is initialized: false
-2. After foundUserProfileBidirectionalLazyLoadingWithMapsId.getUser()
-3. Before userBidirectionalWithMapsId.getName()
+2. After foundUserProfile.getUser()
+3. Before user.getName()
 [Hibernate] 
     select
         u1_0.id,
@@ -156,7 +156,7 @@ alter table if exists user_profile
     where
         u1_0.id=?
 2025-08-18T10:43:49.689+09:00 TRACE 74560 --- [onetoone-lazy] [nio-8899-exec-3] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [1]
-3. After userBidirectionalWithMapsId.getName()
+3. After user.getName()
    User is initialized: true
    userName: lazyTest
 

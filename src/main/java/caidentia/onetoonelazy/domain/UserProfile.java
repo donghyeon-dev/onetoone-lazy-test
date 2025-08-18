@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserProfileBidirectionalWithMapsId {
+public class UserProfile {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -28,9 +28,9 @@ public class UserProfileBidirectionalWithMapsId {
 
     @OneToOne(fetch= FetchType.LAZY)
     @MapsId
-    private UserBidirectionalWithMapsId user;
+    private User user;
 
-    public void modifyUser(UserBidirectionalWithMapsId user) {
+    public void modifyUser(User user) {
         this.user = user;
     }
 }
