@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/user")
 @RequiredArgsConstructor
-public class UserMapsIdController {
+public class UserController {
 
     private final UserBidirectionalWithMapsIdRepository userMapsIdRepository;
 
