@@ -3,15 +3,13 @@ package caidentia.onetoonelazy.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.LazyToOne;
-import org.hibernate.annotations.LazyToOneOption;
 
 @Entity(name = "USER_INFO")
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+public class UserBidirectionalWithMapsId {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -28,9 +26,9 @@ public class User {
 
     // 양방향
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, optional = false, mappedBy = "user")
-    private UserProfile userProfile;
+    private UserProfileBidirectionalWithMapsId userProfile;
 
-    public void modifyUserProfile(UserProfile userProfile) {
+    public void modifyUserProfile(UserProfileBidirectionalWithMapsId userProfile) {
         this.userProfile = userProfile;
         userProfile.modifyUser(this);
     }

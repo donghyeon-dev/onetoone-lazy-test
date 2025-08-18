@@ -1,9 +1,9 @@
 package caidentia.onetoonelazy;
 
-import caidentia.onetoonelazy.domain.User;
-import caidentia.onetoonelazy.domain.UserProfile;
-import caidentia.onetoonelazy.repository.UserProfileRepository;
-import caidentia.onetoonelazy.repository.UserRepository;
+import caidentia.onetoonelazy.domain.UserBidirectionalWithMapsId;
+import caidentia.onetoonelazy.domain.UserProfileBidirectionalWithMapsId;
+import caidentia.onetoonelazy.repository.UserBidirectionalWithMapsIdRepository;
+import caidentia.onetoonelazy.repository.UserProfileBidirectionalWithMapsIdRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.PersistenceContext;
@@ -17,9 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class UserController {
 
-    private final UserRepository userRepository;
+    private final UserBidirectionalWithMapsIdRepository userMapsIdRepository;
 
-    private final UserProfileRepository userProfileRepository;
+    private final UserProfileBidirectionalWithMapsIdRepository userProfileMapsIdRepository;
 
     private final EntityManagerFactory entityManagerFactory;
 
@@ -29,20 +29,20 @@ public class UserController {
     @GetMapping("/save")
     public void saveUser() {
         // User 생성 및 저장
-        User user = User.builder()
+        UserBidirectionalWithMapsId user = UserBidirectionalWithMapsId.builder()
                 .name("lazyTest")
                 .email("lazy@example.com")
                 .password("password123")
                 .build();
 
-        UserProfile profile = UserProfile.builder()
+        UserProfileBidirectionalWithMapsId profile = UserProfileBidirectionalWithMapsId.builder()
                 .bio("양방향 Lazy Loading 테스트")
                 .phoneNumber("010-1111-2222")
                 .address("서울시 강남구")
                 .build();
 
         user.modifyUserProfile(profile);
-        var savedUser = userRepository.saveAndFlush(user);
+        var savedUser = userMapsIdRepository.saveAndFlush(user);
     }
 
     @GetMapping("/lazy-test-user")
@@ -50,13 +50,13 @@ public class UserController {
 
 
         System.out.println("=== 양방향 1:1 Lazy Loading 테스트 ===");
-        System.out.println("1. Before userRepository.findById");
-        User foundUser = userRepository.findById(1L).orElseThrow();
-        System.out.println("1. After userRepository.findById");
+        System.out.println("1. Before userMapsIdRepository.findById");
+        UserBidirectionalWithMapsId foudnUser = userMapsIdRepository.findById(1L).orElseThrow();
+        System.out.println("1. After userMapsIdRepository.findById");
 
-        System.out.println("2. Before foundUser.getUserProfile()");
-        UserProfile userProfile = foundUser.getUserProfile();
-        System.out.println("2. After foundUser.getUserProfile()");
+        System.out.println("2. Before foudnUser.getUserProfile()");
+        UserProfileBidirectionalWithMapsId userProfile = foudnUser.getUserProfile();
+        System.out.println("2. After foudnUser.getUserProfile()");
         System.out.println("   UserProfile is initialized: " + entityManagerFactory.getPersistenceUnitUtil().isLoaded(userProfile, "userProfile"));
 
         System.out.println("3. Before userProfile.getBio()");
@@ -70,14 +70,14 @@ public class UserController {
     @GetMapping("/lazy-test-user-profile")
     public void profileLazyLoadingTest() {
         System.out.println("=== 양방향 1:1 Lazy Loading 테스트 ===");
-        System.out.println("1. Before userProfileRepository.findById");
-        UserProfile foundUserProfile = userProfileRepository.findById(1L).orElseThrow();
-        System.out.println("1. After userProfileRepository.findById");
+        System.out.println("1. Before userProfileMapsIdRepository.findById");
+        UserProfileBidirectionalWithMapsId foudnUserProfile = userProfileMapsIdRepository.findById(1L).orElseThrow();
+        System.out.println("1. After userProfileMapsIdRepository.findById");
 
-        System.out.println("2. Before foundUserProfile.getUser()");
-        User user = foundUserProfile.getUser();
+        System.out.println("2. Before foudnUserProfile.getUser()");
+        UserBidirectionalWithMapsId user = foudnUserProfile.getUser();
         System.out.println("   User is initialized: " + entityManagerFactory.getPersistenceUnitUtil().isLoaded(user, "user"));
-        System.out.println("2. After foundUserProfile.getUser()");
+        System.out.println("2. After foudnUserProfile.getUser()");
 
 
         System.out.println("3. Before user.getName()");
