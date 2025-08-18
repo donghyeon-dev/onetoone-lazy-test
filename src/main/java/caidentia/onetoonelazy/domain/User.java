@@ -9,7 +9,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserBidirectionalWithMapsId {
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -25,10 +25,11 @@ public class UserBidirectionalWithMapsId {
     private String email;
 
     // 양방향
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, optional = false, mappedBy = "user")
-    private UserProfileBidirectionalWithMapsId userProfile;
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "user"
+            , optional = false) // optional = false로 설정하여 항상 존재해야 함을 명시. User만 조회시 UserProfile은 프록시로 초기화하며 추가쿼리 발생하지 않음. 실제 접근시 쿼리실행
+    private UserProfile userProfile;
 
-    public void modifyUserProfile(UserProfileBidirectionalWithMapsId userProfile) {
+    public void modifyUserProfile(UserProfile userProfile) {
         this.userProfile = userProfile;
         userProfile.modifyUser(this);
     }

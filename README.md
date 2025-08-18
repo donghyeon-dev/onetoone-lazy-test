@@ -1,16 +1,9 @@
-# Branch 별 전략
-- master: 1:1 unidirectional mapping
-- one-to-one-bidirectional: 1:1 bidirectional mapping with Byte Enhancement
-- one-to-one-bidirectional-mapsid: 1:1 bidirectional mapping with @MapsId
-
-
-
-
 
 ## one-to-one-bidirectional-mapsid
+@MapsId를 사용하여 양방향 LazyLoading을 할때 핵심은 FK를 가지지 않은 부모 엔티티에서 `optional=false`를 선언하여 추가쿼리가 발생하지 않도록 하는것임.
 ### Domain
 ```java
-public class UserBidirectionalLazyLoadingWithMapsId {
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -26,7 +19,8 @@ public class UserBidirectionalLazyLoadingWithMapsId {
     private String email;
 
     // 양방향
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, optional = false, mappedBy = "userBidirectionalWithMapsId")
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "user"
+            , optional = false) // optional = false로 설정하여 항상 존재해야 함을 명시. User만 조회시 UserProfile은 프록시로 초기화하며 추가쿼리 발생하지 않음. 실제 접근시 쿼리실행
     private UserProfile userProfile;
 
     public void modifyUserProfile(UserProfile userProfile) {
@@ -37,7 +31,7 @@ public class UserBidirectionalLazyLoadingWithMapsId {
 ```
 
 ```java
-public class UserProfileBidirectionalLazyLoadingWithMapsId {
+public class UserProfile {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -53,6 +47,7 @@ public class UserProfileBidirectionalLazyLoadingWithMapsId {
     private String address;
 
     @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id")
     @MapsId
     private User user;
 
@@ -65,33 +60,33 @@ public class UserProfileBidirectionalLazyLoadingWithMapsId {
 
 ### Table
 ```sql
- create table user_info
- (
-     id       bigint      not null,
-     name     varchar(12) not null unique,
-     password varchar(18) not null,
-     email    varchar(30) not null unique,
-     primary key (id)
- );
+create table user_info
+(
+    id       bigint      not null,
+    name     varchar(12) not null unique,
+    password varchar(18) not null,
+    email    varchar(30) not null unique,
+    primary key (id)
+);
 
 create table user_profile
 (
-    user_id      bigint not null,
+    id      bigint not null,
     phone_number varchar(20),
     address      varchar(100),
     bio          varchar(100),
-    primary key (user_id)
+    primary key (id)
 );
 
 alter table if exists user_profile
     add constraint FKqn9hd9joc1cqolpc4io5wyv8n
-        foreign key (user_id)
+        foreign key (id)
             references user_info
 ```
 ### 부모-> 자식 logs
 ```
 === 양방향 1:1 Lazy Loading 테스트 ===
-1. Before userRepository.findById
+1. Before userMapsIdRepository.findById
 [Hibernate] 
     select
         u1_0.id,
@@ -102,24 +97,24 @@ alter table if exists user_profile
         user_info u1_0 
     where
         u1_0.id=?
-2025-08-18T10:43:26.306+09:00 TRACE 74560 --- [onetoone-lazy] [nio-8899-exec-2] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [1]
-1. After userRepository.findById
-2. Before foundUserBidirectionalWithMapsId.getUserProfile()
-2. After foundUserBidirectionalWithMapsId.getUserProfile()
+2025-08-18T15:18:16.184+09:00 TRACE 80904 --- [onetoone-lazy] [nio-8899-exec-2] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [1]
+1. After userMapsIdRepository.findById
+2. Before foudnUser.getUserProfile()
+2. After foudnUser.getUserProfile()
    UserProfile is initialized: false
-3. Before userProfileBidirectionalWithMapsId.getBio()
+3. Before userProfile.getBio()
 [Hibernate] 
     select
-        up1_0.user_id,
+        up1_0.id,
         up1_0.address,
         up1_0.bio,
         up1_0.phone_number 
     from
         user_profile up1_0 
     where
-        up1_0.user_id=?
-2025-08-18T10:43:26.333+09:00 TRACE 74560 --- [onetoone-lazy] [nio-8899-exec-2] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [1]
-3. After userProfileBidirectionalWithMapsId.getBio()
+        up1_0.id=?
+2025-08-18T15:18:16.207+09:00 TRACE 80904 --- [onetoone-lazy] [nio-8899-exec-2] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [1]
+3. After userProfile.getBio()
    UserProfile is initialized: true
    Bio: 양방향 Lazy Loading 테스트
 
@@ -128,23 +123,23 @@ alter table if exists user_profile
 ### 자식->부모 logs
 ```
 === 양방향 1:1 Lazy Loading 테스트 ===
-1. Before userProfileRepository.findById
+1. Before userProfileMapsIdRepository.findById
 [Hibernate] 
     select
-        up1_0.user_id,
+        up1_0.id,
         up1_0.address,
         up1_0.bio,
         up1_0.phone_number 
     from
         user_profile up1_0 
     where
-        up1_0.user_id=?
-2025-08-18T10:43:49.686+09:00 TRACE 74560 --- [onetoone-lazy] [nio-8899-exec-3] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [1]
-1. After userProfileRepository.findById
-2. Before foundUserProfileBidirectionalLazyLoadingWithMapsId.getUser()
+        up1_0.id=?
+2025-08-18T15:18:27.895+09:00 TRACE 80904 --- [onetoone-lazy] [nio-8899-exec-3] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [1]
+1. After userProfileMapsIdRepository.findById
+2. Before foudnUserProfile.getUser()
    User is initialized: false
-2. After foundUserProfileBidirectionalLazyLoadingWithMapsId.getUser()
-3. Before userBidirectionalWithMapsId.getName()
+2. After foudnUserProfile.getUser()
+3. Before user.getName()
 [Hibernate] 
     select
         u1_0.id,
@@ -155,9 +150,8 @@ alter table if exists user_profile
         user_info u1_0 
     where
         u1_0.id=?
-2025-08-18T10:43:49.689+09:00 TRACE 74560 --- [onetoone-lazy] [nio-8899-exec-3] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [1]
-3. After userBidirectionalWithMapsId.getName()
+2025-08-18T15:18:27.899+09:00 TRACE 80904 --- [onetoone-lazy] [nio-8899-exec-3] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [1]
+3. After user.getName()
    User is initialized: true
    userName: lazyTest
-
 ```

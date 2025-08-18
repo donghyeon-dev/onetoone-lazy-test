@@ -1,8 +1,8 @@
 package caidentia.onetoonelazy;
 
-import caidentia.onetoonelazy.domain.UserBidirectionalWithMapsId;
-import caidentia.onetoonelazy.domain.UserProfileBidirectionalWithMapsId;
-import caidentia.onetoonelazy.repository.UserBidirectionalWithMapsIdRepository;
+import caidentia.onetoonelazy.domain.User;
+import caidentia.onetoonelazy.domain.UserProfile;
+import caidentia.onetoonelazy.repository.UserRepository;
 import org.hibernate.Hibernate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -22,28 +22,28 @@ class BytecodeEnhancementTest {
     private TestEntityManager entityManager;
 
     @Autowired
-    private UserBidirectionalWithMapsIdRepository userBidirectionalWithMapsIdRepository;
+    private UserRepository userRepository;
 
-    private UserBidirectionalWithMapsId savedUserBidirectionalWithMapsId;
+    private User savedUser;
 
     @BeforeEach
     void setUp() {
-        UserProfileBidirectionalWithMapsId profile = UserProfileBidirectionalWithMapsId.builder()
+        UserProfile profile = UserProfile.builder()
                 .bio("테스트 바이오")
                 .phoneNumber("010-1234-5678")
                 .address("서울시 강남구")
                 .build();
 
-        UserProfileBidirectionalWithMapsId savedProfile = entityManager.persistAndFlush(profile);
+        UserProfile savedProfile = entityManager.persistAndFlush(profile);
         
-        UserBidirectionalWithMapsId userBidirectionalWithMapsId = UserBidirectionalWithMapsId.builder()
+        User user = User.builder()
                 .name("testUser")
                 .email("test@example.com")
                 .password("password123")
                 .userProfile(savedProfile)
                 .build();
 
-        savedUserBidirectionalWithMapsId = entityManager.persistAndFlush(userBidirectionalWithMapsId);
+        savedUser = entityManager.persistAndFlush(user);
         entityManager.clear();
     }
 
@@ -51,20 +51,20 @@ class BytecodeEnhancementTest {
     @DisplayName("양방향 @OneToOne lazy loading 테스트")
     @Transactional
     void testLazyLoading() {
-        // UserBidirectionalWithMapsId 조회 (JPA Repository 사용)
-        System.out.println("1########## Before userBidirectionalWithMapsIdRepository.findById");
-        UserBidirectionalWithMapsId foundUserBidirectionalWithMapsId = userBidirectionalWithMapsIdRepository.findById(savedUserBidirectionalWithMapsId.getId()).orElseThrow();
+        // User 조회 (JPA Repository 사용)
+        System.out.println("1########## Before userRepository.findById");
+        User foundUser = userRepository.findById(savedUser.getId()).orElseThrow();
         
-        // UserProfileBidirectionalWithMapsId 접근 전 - lazy 상태 확인
-        System.out.println("2########## Before foundUserBidirectionalWithMapsId.getUserProfileBidirectionalLazyLoadingWithMapsId");
-        UserProfileBidirectionalWithMapsId userProfileBidirectionalWithMapsId = foundUserBidirectionalWithMapsId.getUserProfile();
-        System.out.println("########## After foundUserBidirectionalWithMapsId.getUserProfileBidirectionalLazyLoadingWithMapsId()");
-        assertThat(Hibernate.isInitialized(userProfileBidirectionalWithMapsId)).isFalse();
+        // UserProfile 접근 전 - lazy 상태 확인
+        System.out.println("2########## Before foundUser.getUserProfileBidirectionalLazyLoadingWithMapsId");
+        UserProfile userProfile = foundUser.getUserProfile();
+        System.out.println("########## After foundUser.getUserProfileBidirectionalLazyLoadingWithMapsId()");
+        assertThat(Hibernate.isInitialized(userProfile)).isFalse();
         
         // 실제 데이터 접근 시 초기화됨
-        System.out.println("4########## Before userProfileBidirectionalWithMapsId.getBio();");
-        String bio = userProfileBidirectionalWithMapsId.getBio();
-        assertThat(Hibernate.isInitialized(userProfileBidirectionalWithMapsId)).isTrue();
+        System.out.println("4########## Before userProfile.getBio();");
+        String bio = userProfile.getBio();
+        assertThat(Hibernate.isInitialized(userProfile)).isTrue();
         assertThat(bio).isEqualTo("테스트 바이오");
     }
 
