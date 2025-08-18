@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 public class UserProfile {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @Column(length = 100)
@@ -24,6 +25,4 @@ public class UserProfile {
 
     @Column(length = 100)
     private String address;
-
-    // 단방향 관계로 변경 - User 참조 제거
 }

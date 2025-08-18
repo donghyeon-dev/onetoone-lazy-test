@@ -31,8 +31,7 @@ public class User {
 
     // 단방향 예시로 명확한 lazy loading 시점 테스트
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @MapsId
-    @JoinColumn(name = "id")
+    @JoinColumn(name="user_profile_id")
     private UserProfile userProfile;
 
     public void modifyUserProfile(UserProfile userProfile) {
